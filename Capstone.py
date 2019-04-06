@@ -276,27 +276,27 @@ labeltext.describe()
 dataemp["reviews"] = dataemp["summary"] +' ' + dataemp["pros"]+' ' +dataemp["cons"]
 
 
-# In[53]:
+# In[33]:
 
 
 Satisfiedemp = dataemp.loc[dataemp["label"]==1]
 UnSatisfiedemp = dataemp.loc[dataemp["label"]==0]
 
 
-# In[56]:
+# In[34]:
 
 
 Satisfiedemp.shape
 
 
-# In[63]:
+# In[67]:
 
 
-ignorewords = Satisfiedemp["reviews"].isin(['Amazon','company','work', 'place', 'employee', 'team', 'time'])
-satwords = Satisfiedemp.loc[~(ignorewords), "reviews"]
+ignorewords = Satisfiedemp["pros"].isin(['Amazon','company','work', 'place', 'employee', 'team', 'time'])
+satwords = Satisfiedemp.loc[~(ignorewords), "pros"]
 
 
-# In[64]:
+# In[68]:
 
 
 wordcloud = WordCloud().generate(' '.join(satwords))
@@ -305,14 +305,14 @@ plt.axis("off")
 plt.show()
 
 
-# In[67]:
+# In[71]:
 
 
-ignorewords = UnSatisfiedemp["reviews"].isin(['management','manager','employee', 'Amazon', 'customer', 'team', 'time', 'job', 'people',])
-unsatwords = UnSatisfiedemp.loc[~(ignorewords), "reviews"]
+ignorewords = UnSatisfiedemp["cons"].isin(['management','manager','employee', 'Amazon', 'customer', 'team', 'time', 'job', 'people',])
+unsatwords = UnSatisfiedemp.loc[~(ignorewords), "cons"]
 
 
-# In[68]:
+# In[72]:
 
 
 wordcloud = WordCloud().generate(' '.join(unsatwords))
@@ -321,7 +321,7 @@ plt.axis("off")
 plt.show()
 
 
-# In[ ]:
+# In[39]:
 
 
 X = dataemp["reviews"]
@@ -336,7 +336,7 @@ y = dataemp["label"]
 
 # Vectorizing the text data 
 
-# In[33]:
+# In[40]:
 
 
 cv = CountVectorizer()
@@ -345,7 +345,7 @@ X = cv.fit_transform(X)
 
 # Feeding the output of vectors into TFIDF transformer
 
-# In[34]:
+# In[41]:
 
 
 
@@ -355,7 +355,7 @@ tfidf.fit_transform(X)
 
 # Splitting the training and test data in the ratio of 70% training data and 30% test data
 
-# In[35]:
+# In[42]:
 
 
 
@@ -364,26 +364,26 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 
 # Naive Bayes Classification model
 
-# In[36]:
+# In[43]:
 
 
 
 nb = MultinomialNB()
 
 
-# In[37]:
+# In[44]:
 
 
 nb.fit(X_train, y_train)
 
 
-# In[38]:
+# In[45]:
 
 
 predictions = nb.predict(X_test)
 
 
-# In[39]:
+# In[46]:
 
 
 print(confusion_matrix(y_test, predictions))
@@ -391,7 +391,7 @@ print(confusion_matrix(y_test, predictions))
 
 # Accuracy about 77% with Naive Bayes Model
 
-# In[40]:
+# In[47]:
 
 
 print(classification_report(y_test, predictions))
@@ -399,26 +399,26 @@ print(classification_report(y_test, predictions))
 
 # Random Forest Classification Model
 
-# In[41]:
+# In[48]:
 
 
 
 RFmodel = RandomForestClassifier(n_estimators=100)
 
 
-# In[42]:
+# In[49]:
 
 
 RFmodel.fit(X_train, y_train)
 
 
-# In[43]:
+# In[50]:
 
 
 predictions = RFmodel.predict(X_test)
 
 
-# In[44]:
+# In[51]:
 
 
 print(confusion_matrix(y_test, predictions))
@@ -426,21 +426,22 @@ print(confusion_matrix(y_test, predictions))
 
 # Accuracy for Random Forest is same as Naive Bayes around 76%
 
-# In[45]:
+# In[52]:
 
 
 print(classification_report(y_test, predictions))
 
 
-# In[248]:
+# In[58]:
 
 
 
 
 
-names = ["Logistic Regression", "Linear SVC", "LinearSVC with L1-based feature selection","Multinomial NB", 
+names = ["Random Forest Classifier","Logistic Regression", "Linear SVC", "LinearSVC with L1-based feature selection","Multinomial NB", 
          "Bernoulli NB", "Ridge Classifier", "AdaBoost", "Perceptron","Passive-Aggresive", "Nearest Centroid"]
 classifiers = [
+    RandomForestClassifier(n_estimators=100),
     LogisticRegression(solver='liblinear'),
     LinearSVC(max_iter = 100),
     Pipeline([
@@ -455,9 +456,10 @@ classifiers = [
     NearestCentroid()
     ]
 classifierlist = zip(names,classifiers)
+vec = CountVectorizer()
 
 
-# In[249]:
+# In[59]:
 
 
 X = dataemp["reviews"]
@@ -465,7 +467,7 @@ y = dataemp["label"]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=100)
 
 
-# In[250]:
+# In[60]:
 
 
 def review_summary(pipeline, X_train, X_test, y_train, y_test):
@@ -485,7 +487,7 @@ def review_summary(pipeline, X_train, X_test, y_train, y_test):
     return accuracy*100, train_test_time
 
 
-# In[251]:
+# In[61]:
 
 
 def classifiervectorizer_compare(vectorizer=vec, n_features=10000,  ngram_range=(1, 1), classifier=classifierlist):
@@ -503,7 +505,7 @@ def classifiervectorizer_compare(vectorizer=vec, n_features=10000,  ngram_range=
     return result
 
 
-# In[252]:
+# In[62]:
 
 
 # import warnings filter
@@ -518,16 +520,16 @@ vectorizers = [TfidfVectorizer(),CountVectorizer() ]
 vectorizerlist = zip(vectorizernames, vectorizers )
 tvec = TfidfVectorizer()
 cvec = CountVectorizer()
-bigram_result = classifiervectorizer_compare(vectorizer=tvec,n_features=100000,ngram_range=(1,3))
+bigram_result = classifiervectorizer_compare(vectorizer=tvec,n_features=100000,ngram_range=(1,2))
 
 
-# In[253]:
+# In[ ]:
 
 
 bigram_result
 
 
-# On comparing the accuracy and the duration taken for each classifier, Multinomial NB suits best for this problem statement. IT gives an accuray of 78.17% which was returned in 12.73 seconds
+# On comparing the accuracy and the duration taken for each classifier, Multinomial NB suits best for solving this problem. It has the maximum accuracy of 78.17% and returned in the least duration of all.
 
 # In[ ]:
 
